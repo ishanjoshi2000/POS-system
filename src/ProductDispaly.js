@@ -26,7 +26,6 @@ const ProductDisplay = ({addToCart}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     // Fetch categories from the API endpoint

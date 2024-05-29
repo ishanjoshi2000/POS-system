@@ -104,12 +104,6 @@ const ProductCard = ({ product,addToCart }) => {
             {truncateProductName(product.name)} {/* Display truncated product name */}
           </Typography>
         </Tooltip>
-        <div className={classes.rating}>
-          <Rating name="read-only" value={product.rating} readOnly size="small" />
-          <Typography variant="body2" color="textSecondary" component="p">
-            ({product.numReviews})
-          </Typography>
-        </div>
         <Typography className={classes.price} variant="h6" component="p">
           Rs {product.sell_price}
         </Typography>

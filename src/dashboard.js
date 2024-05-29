@@ -16,7 +16,7 @@ function DashboardPage() {
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
-        return [...prevCartItems, { ...product, quantity: 1 }];
+        return [...prevCartItems, { ...product, quantity: 1, rate:product.sell_price}];
       }
     });
   };
@@ -49,10 +49,10 @@ const styles = {
     padding: '20px', // Add some padding for better spacing
   },
   productDisplay: {
-    width: '70%',
+    width: '65%',
   },
   shoppingCart: {
-    width: '30%',
+    width: '35%',
     backgroundColor: '#ffffff', // White background color for the shopping cart area
     borderRadius: '8px', // Add some rounded corners
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Add a subtle shadow for depth
