@@ -1,134 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button,
-  TextField, MenuItem, Select, FormControl, InputLabel
+  TextField
 } from '@material-ui/core';
-import Autocomplete from '@mui/material/Autocomplete';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { NepaliDatePicker } from "nepali-datepicker-reactjs"
 
-const ShoppingCart = ({ cartItems, setCartItems }) => {
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [panNo, setPanNo] = useState('');
-  const [billSerialNo, setBillSerialNo] = useState(0);
-  const [billType, setBillType] = useState('Cash');
-  const [currentDate, setCurrentDate] = useState();
+const ShoppingCart = ({ cartItems = [], setCartItems }) => {
+  const [orderNo, setOrderNo] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch customer data
-    const fetchCustomers = async () => {
+    const fetchOrderNo = async () => {
       try {
-        const response = await fetch('https://api.example.com/customers'); // Replace with your API endpoint
+        const response = await fetch('https://api.example.com/orderNo');
         const data = await response.json();
-        setCustomers(data.customers);
+        setOrderNo(data.orderNo);
       } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error('Error fetching order number:', error);
       }
     };
 
-    // Fetch last bill serial number
-    const fetchLastSerialNo = async () => {
-      try {
-        const response = await fetch('https://api.example.com/lastBillSerial'); // Replace with your API endpoint
-        const data = await response.json();
-        setBillSerialNo(data.lastSerialNo + 1);
-      } catch (error) {
-        console.error('Error fetching last bill serial number:', error);
-      }
-    };
-
-    fetchCustomers();
-    fetchLastSerialNo();
+    fetchOrderNo();
+    setLoading(false); // Set loading to false after order number has been fetched
   }, []);
 
   const handleDelete = (itemId) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
+    if (cartItems) {
+      setCartItems(cartItems.filter(item => item.id !== itemId));
+    }
   };
 
   const handleKeyDown = (e, rowIndex, cellIndex) => {
-    const totalCells = 3; // Number of cells before the OK button
+    const totalCells = 3;
     if (e.key === 'Enter') {
-      if (cellIndex === totalCells - 1) { // If on the last cell (Rate)
-        if (rowIndex === cartItems.length - 1) { // If on the last row
-          document.getElementById('ok-button').focus(); // Move to the OK button
+      if (cellIndex === totalCells - 1) {
+        if (rowIndex === cartItems.length - 1) {
+          document.getElementById('ok-button').focus();
         } else {
           const nextRow = rowIndex + 1;
-          document.getElementById(`cell-${nextRow}-1`).focus(); // Move to the Qty cell of the next row
+          document.getElementById(`cell-${nextRow}-1`).focus();
         }
       } else {
         const nextCell = cellIndex + 1;
-        document.getElementById(`cell-${rowIndex}-${nextCell}`).focus(); // Move to the next cell in the same row
+        document.getElementById(`cell-${rowIndex}-${nextCell}`).focus();
       }
     } else if (e.key === 'Delete') {
-      handleDelete(cartItems[rowIndex].id); // Delete row if Delete key is pressed
+      handleDelete(cartItems[rowIndex].id);
     }
   };
 
-  const handleCustomerChange = (event, newValue) => {
-    setSelectedCustomer(newValue);
-    if (newValue) {
-      // Assume API provides PAN no in customer data
-      setPanNo(newValue.panNo);
-    } else {
-      setPanNo('');
-    }
+  const handleRowChange = (e, rowIndex, key) => {
+    const updatedItems = cartItems.map((item, index) => {
+      if (index === rowIndex) {
+        return { ...item, [key]: e.target.value };
+      }
+      return item;
+    });
+    setCartItems(updatedItems);
+  };
+
+  const handleOkClick = () => {
+    // Add your logic here for handling the OK button click
+    console.log('OK button clicked');
+  };
+
+  const handleCancelClick = () => {
+    // Add your logic here for handling the Cancel button click
+    console.log('Cancel button clicked');
   };
 
   return (
-    <Paper style={{ padding: '20px', height: '100%' }}>
-      <div style={styles.header}>
-        <Autocomplete
-          options={customers}
-          getOptionLabel={(option) => option.name}
-          style={{ width: '100%', marginBottom: '20px' }}
-          onChange={handleCustomerChange}
-          renderInput={(params) => <TextField {...params} label="Customer Name" variant="outlined" />}
-        />
-        <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>
-          <TextField
-            label="PAN No"
-            value={panNo}
-            variant="outlined"
-            style={{ marginRight: '20px', width: 'calc(50% - 10px)' }}
-            InputProps={{
-              readOnly: true,
-            }}
-          />
-          <TextField
-            label="Bill Serial No"
-            value={billSerialNo}
-            variant="outlined"
-            style={{ marginRight: '20px', width: 'calc(50% - 10px)' }}
-            InputProps={{
-              readOnly: true,
-            }}
-          />
-          <NepaliDatePicker
-            className="nepali-date-picker"
-            value={currentDate}
-            onChange={(value) => setCurrentDate(value)}
-            options={{ calenderLocale: "ne", valueLocale: "en" }}
-            style={{ width: '100%' }}
-          />
-          <FormControl variant="outlined" style={{ width: '100%', marginTop: '20px' }}>
-            <InputLabel>Bill Type</InputLabel>
-            <Select
-              value={billType}
-              onChange={(e) => setBillType(e.target.value)}
-              label="Bill Type"
-            >
-              <MenuItem value="Cash">Cash</MenuItem>
-              <MenuItem value="Credit">Credit</MenuItem>
-              <MenuItem value="FonePay">FonePay</MenuItem>
-              <MenuItem value="Esewa">Esewa</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
-      </div>
-
-      <TableContainer style={{ maxHeight: 'calc(100% - 180px)' }}>
+    <Paper style={{ padding: '20px', height: 'calc(100% - 40px)', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+      <TextField
+        label="Order No"
+        value={orderNo}
+        variant="outlined"
+        fullWidth
+        size="small" // Adjusted size to small
+        style={{ marginBottom: '10px', width: '30%', marginLeft: 'auto', marginRight: 'auto' }}
+        InputProps={{
+          readOnly: true,
+        }}
+      />
+      <TableContainer style={{ maxHeight: 'calc(100% - 90px)', overflowY: 'auto', borderRadius: '15px', border: '1px solid #ddd' }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
@@ -136,52 +90,58 @@ const ShoppingCart = ({ cartItems, setCartItems }) => {
               <TableCell align="center">Quantity</TableCell>
               <TableCell align="center">Rate</TableCell>
               <TableCell align="center">Total</TableCell>
-              <TableCell></TableCell> {/* Empty cell for delete button column */}
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {cartItems.map((item, rowIndex) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell
-                  id={`cell-${rowIndex}-1`}
-                  onKeyDown={(e) => handleKeyDown(e, rowIndex, 1)}
-                  contentEditable
-                >
-                  {item.quantity}
-                </TableCell>
-                <TableCell
-                  id={`cell-${rowIndex}-2`}
-                  onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
-                  contentEditable
-                >
-                  {item.rate}
-                </TableCell>
-                <TableCell>{item.quantity * item.rate}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleDelete(item.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">Loading...</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              cartItems.map((item, rowIndex) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>
+                    <TextField
+                      id={`cell-${rowIndex}-1`}
+                      value={item.quantity}
+                      onChange={(e) => handleRowChange(e, rowIndex, 'quantity')}
+                      onKeyDown={(e) => handleKeyDown(e, rowIndex, 1)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      id={`cell-${rowIndex}-2`}
+                      value={item.rate}
+                      onChange={(e) => handleRowChange(e, rowIndex, 'rate')}
+                      onKeyDown={(e) => handleKeyDown(e, rowIndex, 2)}
+                    />
+                  </TableCell>
+                  <TableCell>{item.quantity * item.rate}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleDelete(item.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-      <Button id="ok-button" variant="contained" color="primary" style={{ marginTop: '20px', float: 'left' }}>
+          <div style={{ textAlign: 'center', marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+      <Button id="ok-button" onClick={handleOkClick} variant="contained" color="primary">
         OK
       </Button>
-      <Button id="cancel-button" variant="contained" color="primary" style={{ marginTop: '20px', float: 'right' }}>
+      <Button id="cancel-button" onClick={handleCancelClick} variant="contained" color="secondary">
         Cancel
       </Button>
+    </div>
+
+
     </Paper>
   );
-};
-
-const styles = {
-  header: {
-    marginBottom: '20px',
-  },
 };
 
 export default ShoppingCart;
