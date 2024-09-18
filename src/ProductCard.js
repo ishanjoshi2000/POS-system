@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardMedia, Typography, Button, makeStyles, Tooltip, IconButton } from '@material-ui/core';
 import Rating from '@material-ui/lab/Rating';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import { green, grey } from '@material-ui/core/colors';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -19,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'space-between',
     position: 'relative',
+    backgroundColor:'rgb(227, 227, 227)',
   },
   media: {
     height: 200,
